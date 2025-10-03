@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchPosts } from "../features/postsSlice";
@@ -12,19 +12,45 @@ function PostList() {
     (state) => state.posts
   );
 
+  // State cho search
+  const [filteredPosts, setFilteredPosts] = useState([]);
+
+  // Fetch posts khi load trang hoặc đổi page
   useEffect(() => {
     dispatch(fetchPosts(page));
   }, [dispatch, page]);
 
+  // Khi list thay đổi (fetch xong), reset filteredPosts = list
+  useEffect(() => {
+    setFilteredPosts(list);
+  }, [list]);
+
+  // Hàm search
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setFilteredPosts(
+      list.filter((post) => post.title.toLowerCase().includes(query))
+    );
+  };
+
   if (loading) return <Loading />;
   if (error) return <ErrorBox message={error} />;
 
+  // Pagination logic
   const start = (page - 1) * perPage;
-  const currentPosts = list.slice(start, start + perPage);
+  const currentPosts = filteredPosts.slice(start, start + perPage);
 
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6 text-gray-900">📑 Latest Posts</h2>
+
+      <input
+        type="text"
+        placeholder="🔍 Search posts..."
+        onChange={handleSearch}
+        className="w-full mb-6 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
       <div className="grid sm:grid-cols-2 gap-6">
         {currentPosts.map((post) => (
           <div
@@ -44,6 +70,7 @@ function PostList() {
           </div>
         ))}
       </div>
+
       <Pagination />
     </div>
   );
