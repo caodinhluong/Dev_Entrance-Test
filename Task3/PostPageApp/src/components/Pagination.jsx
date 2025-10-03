@@ -1,11 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPosts } from "../features/postsSlice";
 
-function Pagination() {
+function Pagination({ total, totalPages }) {
   const dispatch = useDispatch();
-  const { page, perPage, total } = useSelector((state) => state.posts);
-
-  const totalPages = Math.ceil(total / perPage);
+  const { page } = useSelector((state) => state.posts);
 
   const changePage = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {

@@ -12,44 +12,38 @@ function PostList() {
     (state) => state.posts
   );
 
-  // State cho search
-  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [search, setSearch] = useState("");
 
-  // Fetch posts khi load trang hoặc đổi page
   useEffect(() => {
     dispatch(fetchPosts(page));
   }, [dispatch, page]);
 
-  // Khi list thay đổi (fetch xong), reset filteredPosts = list
-  useEffect(() => {
-    setFilteredPosts(list);
-  }, [list]);
-
-  // Hàm search
-  const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setFilteredPosts(
-      list.filter((post) => post.title.toLowerCase().includes(query))
-    );
-  };
-
   if (loading) return <Loading />;
   if (error) return <ErrorBox message={error} />;
 
-  // Pagination logic
+  // lọc theo từ khoá
+  const filtered = list.filter((post) =>
+    post.title.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / perPage);
   const start = (page - 1) * perPage;
-  const currentPosts = filteredPosts.slice(start, start + perPage);
+  const currentPosts = filtered.slice(start, start + perPage);
 
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6 text-gray-900">📑 Latest Posts</h2>
 
-      <input
-        type="text"
-        placeholder="🔍 Search posts..."
-        onChange={handleSearch}
-        className="w-full mb-6 p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <div className="mb-6">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="🔍 Search posts..."
+          className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+        />
+      </div>
 
       <div className="grid sm:grid-cols-2 gap-6">
         {currentPosts.map((post) => (
@@ -71,7 +65,14 @@ function PostList() {
         ))}
       </div>
 
-      <Pagination />
+      {filtered.length === 0 && (
+        <p className="text-center text-gray-500 mt-6">No posts found 🚫</p>
+      )}
+
+      {/* pagination */}
+      {filtered.length > 0 && (
+        <Pagination total={total} totalPages={totalPages} />
+      )}
     </div>
   );
 }
