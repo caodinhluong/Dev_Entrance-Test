@@ -1,10 +1,17 @@
 function bestHarvest(yields) {
+  if (yields.length === 0) return 0;
+
   let maxSum = -Infinity;
   let currentSum = 0;
   let currentLength = 0;
   let bestLength = 0;
+  let allNegative = true;
+  let maxSingleNegative = -Infinity;
 
   for (let y of yields) {
+    if (y >= 0) allNegative = false;
+    if (y < 0 && y > maxSingleNegative) maxSingleNegative = y;
+
     if (currentSum + y < y) {
       currentSum = y;
       currentLength = 1;
@@ -19,8 +26,11 @@ function bestHarvest(yields) {
     }
   }
 
+  if (allNegative) return 1;
+
   return bestLength;
 }
+
 console.log(bestHarvest([-2, 1, -3, 4, -1]));        //1(dãy con tốt nhất là [4])
 console.log(bestHarvest([-1, 2, 3, -2, 5, -3]));     //4(dãy con tốt nhất là [2,3,-2,5] có tổng 8)
 console.log(bestHarvest([1, 2, 3, 4]));              //4(cả mảng đều tốt nhất)
